@@ -14,6 +14,12 @@ services:
   backend:
     image: opleiding-harbor.bcverdouw.nl/wc/umpire_quiz_questionservice:${BACKEND_VERSION}
     pull_policy: always
+    healthcheck:
+      test: ["CMD", "curl http://localhost:9080/health/ready" ]
+      interval: 10s
+      timeout: 10s
+      retries: 24
+      start_period: 10s
     ports:
       - "${BACKEND_PORT}:9080"
     environment:
@@ -31,10 +37,11 @@ services:
     image: docker.io/mysql:${DB_VERSION}
     pull_policy: missing
     healthcheck:
-      test: ["CMD", "mysqladmin ping -h 127.0.0.1 --user=root --password=$$MYSQL_ROOT_PASSWORD" ]
+      test: ["CMD", "mysqladmin ping -h 127.0.0.1 --user=root --password=${BACKEND_DB_PASSWORD}" ]
       interval: 30s
       timeout: 10s
-      retries: 5
+      start_period: 10s
+      retries: 10
     environment:
       MYSQL_ROOT_PASSWORD: "${BACKEND_DB_PASSWORD}"
       MYSQL_DATABASE: "${BACKEND_DB_NAME}"
@@ -62,29 +69,30 @@ services:
   # --- End Importer service --- #
 
   # --- User service --- #
- user-service:
-   image: opleiding-harbor.bcverdouw.nl/wc/umpire_quiz_userservice:${USER_SERVICE_VERSION}
-   pull_policy: always
-   ports:
-     - "${USER_SERVICE_PORT}:9080"
-   environment:
-     MYSQL_HOSTNAME: "user-service-db"
-     MYSQL_PORT: "3306"
-     MYSQL_ROOT_PASSWORD: "${USER_SERVICE_DB_PASSWORD}"
-     MYSQL_DATABASE: "${USER_SERVICE_DB_NAME}"
-     FRONTEND_URL: "${FRONTEND_URL}"
-     JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
-   depends_on:
-     - user-service-db
+  user-service:
+    image: opleiding-harbor.bcverdouw.nl/wc/umpire_quiz_userservice:${USER_SERVICE_VERSION}
+    pull_policy: always
+    ports:
+      - "${USER_SERVICE_PORT}:9080"
+    environment:
+      MYSQL_HOSTNAME: "user-service-db"
+      MYSQL_PORT: "3306"
+      MYSQL_ROOT_PASSWORD: "${USER_SERVICE_DB_PASSWORD}"
+      MYSQL_DATABASE: "${USER_SERVICE_DB_NAME}"
+      FRONTEND_URL: "${FRONTEND_URL}"
+      JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
+    depends_on:
+      - user-service-db
 
   user-service-db:
     image: docker.io/mysql:${DB_VERSION}
     pull_policy: missing
     healthcheck:
-      test: ["CMD", "mysqladmin ping -h 127.0.0.1 --user=root --password=$$MYSQL_ROOT_PASSWORD" ]
+      test: ["CMD", "mysqladmin ping -h 127.0.0.1 --user=root --password=${USER_SERVICE_DB_PASSWORD}" ]
       interval: 30s
+      start_period: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
     environment:
       MYSQL_ROOT_PASSWORD: "${USER_SERVICE_DB_PASSWORD}"
       MYSQL_DATABASE: "${USER_SERVICE_DB_NAME}"
