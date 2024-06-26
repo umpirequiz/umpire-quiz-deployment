@@ -82,7 +82,8 @@ services:
       FRONTEND_URL: "${FRONTEND_URL}"
       JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
     depends_on:
-      - user-service-db
+      user-service-db:
+        condition: service_healthy
 
   user-service-db:
     image: docker.io/mysql:${DB_VERSION}
