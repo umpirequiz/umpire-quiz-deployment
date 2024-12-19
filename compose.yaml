@@ -21,7 +21,7 @@ services:
     #    image: bramjanssens/umpire-quiz-question-service:${QUESTION_SERVICE_VERSION}
     #    pull_policy: always
     healthcheck:
-      test: [ "CMD", "curl http://localhost:9080/health/ready" ]
+      test: [ "CMD", "curl", "http://localhost:9080/health/ready" ]
       interval: 2s
       timeout: 10s
       retries: 24
@@ -33,8 +33,7 @@ services:
       MYSQL_PORT: "${DB_PORT}"
       MYSQL_DATABASE: "${QUESTIONS_DB}"
       MYSQL_ROOT_PASSWORD: "${QUESTION_SERVICE_DB_PASSWORD}"
-      FRONTEND_URL: "${FRONTEND_URL}"
-      JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
+      MYSQL_USE_SSL: "true"
     depends_on:
       question-service-db:
         condition: service_healthy
