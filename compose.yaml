@@ -8,8 +8,8 @@ services:
 
   frontend:
     image: umpire-quiz-frontend:${FRONTEND_VERSION}
-#    image: bramjanssens/umpire-quiz-front-end:${FRONTEND_VERSION}
-#    pull_policy: always
+    #    image: bramjanssens/umpire-quiz-front-end:${FRONTEND_VERSION}
+    #    pull_policy: always
     ports:
       - "${FRONTEND_PORT}:80"
     environment:
@@ -56,15 +56,15 @@ services:
     ports:
       - "${DB_PORT}:3306"
     volumes:
-      - "question-service-db-data:/var/lib/mysql"
+      - question-service-db-data:/var/lib/mysql
     networks:
       - umpire-network
 
   # --- Importer service --- #
   importer-service:
     image: umpire-quiz-importer-service:${IMPORTER_SERVICE_VERSION}
-#      image: bramjanssens/umpire-quiz-importer-service:${IMPORTER_SERVICE_VERSION}
-#      pull_policy: always
+    #      image: bramjanssens/umpire-quiz-importer-service:${IMPORTER_SERVICE_VERSION}
+    #      pull_policy: always
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:9080/health/ready" ]
       interval: 2s
@@ -93,8 +93,8 @@ services:
 
   user-service:
     image: umpire-quiz-user-service:${USER_SERVICE_VERSION}
-#    image: bramjanssens/umpire-quiz-user-service:${USER_SERVICE_VERSION}
-#    pull_policy: always
+    #    image: bramjanssens/umpire-quiz-user-service:${USER_SERVICE_VERSION}
+    #    pull_policy: always
     ports:
       - "${USER_SERVICE_PORT}:9080"
     healthcheck:
