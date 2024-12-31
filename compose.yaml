@@ -1,10 +1,18 @@
 name: umpire-quiz
 
 services:
-  #  reverse-proxy:
-  #    image: bramjanssens/umpire-quiz-reverse-proxy:${PROXY_VERSION}
-  #    ports:
-  #      - "81:80"
+  reverse-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      umpire-network:
 
   frontend:
     #    image: umpire-quiz-frontend:${FRONTEND_VERSION}
@@ -16,6 +24,8 @@ services:
       QUESTION_SERVICE_URL: "${QUESTION_SERVICE_URL}"
       USER_SERVICE_URL: "${USER_SERVICE_URL}"
       IMPORTER_URL: "${IMPORTER_URL}"
+    networks:
+      umpire-network:
 
   question-service:
     #    image: umpire-quiz-question-service:${QUESTION_SERVICE_VERSION}
@@ -35,6 +45,7 @@ services:
       MYSQL_DATABASE: "${QUESTIONS_DB}"
       MYSQL_ROOT_PASSWORD: "${QUESTION_SERVICE_DB_PASSWORD}"
       MYSQL_USE_SSL: "true"
+      JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
     depends_on:
       question-service-db:
         condition: service_healthy
@@ -141,4 +152,3 @@ volumes:
 
 networks:
   umpire-network:
-    driver: bridge
