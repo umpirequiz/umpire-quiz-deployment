@@ -15,7 +15,6 @@ services:
       umpire-network:
 
   frontend:
-    #    image: umpire-quiz-frontend:${FRONTEND_VERSION}
     image: bramjanssens/umpire-quiz-frontend:${FRONTEND_VERSION}
     pull_policy: always
     ports:
@@ -28,7 +27,6 @@ services:
       umpire-network:
 
   question-service:
-    #    image: umpire-quiz-question-service:${QUESTION_SERVICE_VERSION}
     image: bramjanssens/umpire-quiz-question-service:${QUESTION_SERVICE_VERSION}
     pull_policy: always
     healthcheck:
@@ -73,7 +71,6 @@ services:
 
   # --- Importer service --- #
   importer-service:
-    #    image: umpire-quiz-importer-service:${IMPORTER_SERVICE_VERSION}
     image: bramjanssens/umpire-quiz-importer-service:${IMPORTER_SERVICE_VERSION}
     pull_policy: always
     healthcheck:
@@ -103,7 +100,6 @@ services:
     # --- End Importer service --- #
 
   user-service:
-    #    image: umpire-quiz-user-service:${USER_SERVICE_VERSION}
     image: bramjanssens/umpire-quiz-user-service:${USER_SERVICE_VERSION}
     pull_policy: always
     ports:
