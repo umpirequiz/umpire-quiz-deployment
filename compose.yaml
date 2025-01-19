@@ -1,26 +1,154 @@
-version: "3"
+name: umpire-quiz
 
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  reverse-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
     ports:
-      - "4280:80"
-    networks:
-      - internal
+      - '80:80'
+      - '81:81'
+      - '443:443'
     volumes:
-      - ./data/:/var/www/html/
-      - ./logs/nginx:/var/log/nginx/
+      - ./proxy/data:/data
+      - ./proxy/letsencrypt:/etc/letsencrypt
+    networks:
+      umpire-network:
 
-  php:
-    image: php:fpm-alpine
+  frontend:
+    #    image: umpire-quiz-frontend:${FRONTEND_VERSION}
+    image: bramjanssens/umpire-quiz-frontend:${FRONTEND_VERSION}
+    pull_policy: always
+    ports:
+      - "${FRONTEND_PORT}:80"
+    environment:
+      QUESTION_SERVICE_URL: "${QUESTION_SERVICE_URL}"
+      USER_SERVICE_URL: "${USER_SERVICE_URL}"
+      IMPORTER_URL: "${IMPORTER_URL}"
     networks:
-      - internal
+      umpire-network:
+
+  question-service:
+    #    image: umpire-quiz-question-service:${QUESTION_SERVICE_VERSION}
+    image: bramjanssens/umpire-quiz-question-service:${QUESTION_SERVICE_VERSION}
+    pull_policy: always
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:9080/health/ready" ]
+      interval: 2s
+      timeout: 10s
+      retries: 24
+      start_period: 10s
+    ports:
+      - "${QUESTION_SERVICE_PORT}:9080"
+    environment:
+      MYSQL_HOSTNAME: "${QUESTION_SERVICE_DB_HOST_NAME}"
+      MYSQL_PORT: "${DB_PORT}"
+      MYSQL_DATABASE: "${QUESTIONS_DB}"
+      MYSQL_ROOT_PASSWORD: "${QUESTION_SERVICE_DB_PASSWORD}"
+      MYSQL_USE_SSL: "true"
+      JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
+    depends_on:
+      question-service-db:
+        condition: service_healthy
+    networks:
+      - umpire-network
+
+  question-service-db:
+    image: mysql:${DB_VERSION}
+    pull_policy: missing
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 2s
+      timeout: 10s
+      start_period: 2s
+      retries: 10
+    environment:
+      MYSQL_ROOT_PASSWORD: "${QUESTION_SERVICE_DB_PASSWORD}"
+      MYSQL_DATABASE: "${QUESTIONS_DB}"
+    ports:
+      - "${DB_PORT}:3306"
     volumes:
-      - ./data/:/var/www/html/
-      - ./logs/php.log:/var/log/fpm-php.www.log
+      - question-service-db-data:/var/lib/mysql
+    networks:
+      - umpire-network
+
+  # --- Importer service --- #
+  importer-service:
+    #    image: umpire-quiz-importer-service:${IMPORTER_SERVICE_VERSION}
+    image: bramjanssens/umpire-quiz-importer-service:${IMPORTER_SERVICE_VERSION}
+    pull_policy: always
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:9080/health/ready" ]
+      interval: 2s
+      timeout: 10s
+      retries: 24
+      start_period:
+        10s
+    ports:
+      - "${IMPORTER_SERVICE_PORT}:9080"
+    environment:
+      MYSQL_HOSTNAME: "${QUESTION_SERVICE_DB_HOST_NAME}"
+      MYSQL_PORT: "${DB_PORT}"
+      MYSQL_DATABASE: "${QUESTIONS_DB}"
+      MYSQL_ROOT_PASSWORD: "${QUESTION_SERVICE_DB_PASSWORD}"
+      FRONTEND_URL: "${FRONTEND_URL}"
+      JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
+    depends_on:
+      question-service-db:
+        condition: service_healthy
+      question-service:
+        condition: service_healthy
+    networks:
+      - umpire-network
+
+    # --- End Importer service --- #
+
+  user-service:
+    #    image: umpire-quiz-user-service:${USER_SERVICE_VERSION}
+    image: bramjanssens/umpire-quiz-user-service:${USER_SERVICE_VERSION}
+    pull_policy: always
+    ports:
+      - "${USER_SERVICE_PORT}:9080"
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:9080/health/ready" ]
+      interval: 2s
+      timeout: 10s
+      retries: 24
+      start_period: 10s
+    environment:
+      MYSQL_HOSTNAME: "${USER_SERVICE_DB_HOST_NAME}"
+      MYSQL_PORT: "${DB_PORT}"
+      MYSQL_DATABASE: "${USERS_DB}"
+      MYSQL_ROOT_PASSWORD: "${USER_SERVICE_DB_PASSWORD}"
+      FRONTEND_URL: "${FRONTEND_URL}"
+      JWT_SHAREDKEY: "${JWT_SHAREDKEY}"
+    depends_on:
+      user-service-db:
+        condition: service_healthy
+    networks:
+      - umpire-network
+
+  user-service-db:
+    image: mysql:${DB_VERSION}
+    pull_policy: missing
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 2s
+      timeout: 10s
+      start_period: 2s
+      retries: 10
+    environment:
+      MYSQL_ROOT_PASSWORD: "${USER_SERVICE_DB_PASSWORD}"
+      MYSQL_DATABASE: "${USERS_DB}"
+    ports:
+      - "3307:3306"
+    volumes:
+      - user-service-db-data:/var/lib/mysql
+    networks:
+      - umpire-network
+
+volumes:
+  question-service-db-data:
+  user-service-db-data:
 
 networks:
-  internal:
-    driver: bridge
+  umpire-network:
