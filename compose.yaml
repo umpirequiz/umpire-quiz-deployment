@@ -1,18 +1,19 @@
 name: umpire-quiz
 
 services:
-  reverse-proxy:
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
-    volumes:
-      - ./proxy/data:/data
-      - ./proxy/letsencrypt:/etc/letsencrypt
-    networks:
-      umpire-network:
+# now lives inside umpire-quiz-deployment
+  # reverse-proxy:
+    # image: 'jc21/nginx-proxy-manager:latest'
+    # restart: unless-stopped
+    # ports:
+    #   - '80:80'
+    #   - '81:81'
+    #   - '443:443'
+    # volumes:
+    #   - ./proxy/data:/data
+    #   - ./proxy/letsencrypt:/etc/letsencrypt
+    # networks:
+    #   umpire-network:
 
   frontend:
     #    image: umpire-quiz-frontend:${FRONTEND_VERSION}
