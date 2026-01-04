@@ -4,6 +4,7 @@ services:
   reverse-proxy:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
+    pull_policy: always
     ports:
       - '80:80'
       - '81:81'
