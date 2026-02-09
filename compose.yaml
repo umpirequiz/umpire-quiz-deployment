@@ -10,10 +10,10 @@ services:
       - '81:81'
       - '443:443'
     volumes:
-      - ./proxy/local/data:/data
-      - ./proxy/local/letsencrypt:/etc/letsencrypt
-#      - ./proxy/data:/data
-#      - ./proxy/letsencrypt:/etc/letsencrypt
+#      - ./proxy/local/data:/data
+#      - ./proxy/local/letsencrypt:/etc/letsencrypt
+      - ./proxy/data:/data
+      - ./proxy/letsencrypt:/etc/letsencrypt
     networks:
       umpire-network:
 
