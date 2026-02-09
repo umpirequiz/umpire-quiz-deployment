@@ -1,2 +1,0 @@
-2026/02/09 16:00:42 [error] 205#205: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.143.2, server: nginxproxymanager, request: "GET /api/ HTTP/1.1", upstream: "http://127.0.0.1:3000/", host: "localhost:81", referrer: "http://localhost:81/"
-2026/02/09 16:00:43 [error] 205#205: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.143.2, server: nginxproxymanager, request: "GET /api/ HTTP/1.1", upstream: "http://127.0.0.1:3000/", host: "localhost:81", referrer: "http://localhost:81/"
