@@ -4,21 +4,16 @@ services:
   reverse-proxy:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
-    pull_policy: always
+    #    pull_policy: always
     ports:
       - '80:80'
       - '81:81'
       - '443:443'
-#    depends_on:
-#      question-service:
-#        condition: service_healthy
-#      user-service:
-#        condition: service_healthy
-#      importer-service:
-#        condition: service_healthy
     volumes:
-      - ./proxy/data:/data
-      - ./proxy/letsencrypt:/etc/letsencrypt
+      - ./proxy/local/data:/data
+      - ./proxy/local/letsencrypt:/etc/letsencrypt
+#      - ./proxy/data:/data
+#      - ./proxy/letsencrypt:/etc/letsencrypt
     networks:
       umpire-network:
 
@@ -46,8 +41,10 @@ services:
       retries: 24
       start_period: 10s
     ports:
-      - "${QUESTION_SERVICE_PORT}:9080"
+      - "${QUESTION_SERVICE_EXPOSED_PORT}:9080"
     environment:
+      HTTP_PORT: "${HTTP_PORT}"
+      HTTPS_PORT: "${HTTPS_PORT}"
       MYSQL_HOSTNAME: "${QUESTION_SERVICE_DB_HOST_NAME}"
       MYSQL_PORT: "${DB_PORT}"
       MYSQL_DATABASE: "${QUESTIONS_DB}"
@@ -92,8 +89,10 @@ services:
       start_period:
         10s
     ports:
-      - "${IMPORTER_SERVICE_PORT}:9080"
+      - "${IMPORTER_SERVICE_EXPOSED_PORT}:9080"
     environment:
+      HTTP_PORT: "${HTTP_PORT}"
+      HTTPS_PORT: "${HTTPS_PORT}"
       MYSQL_HOSTNAME: "${QUESTION_SERVICE_DB_HOST_NAME}"
       MYSQL_PORT: "${DB_PORT}"
       MYSQL_DATABASE: "${QUESTIONS_DB}"
@@ -115,7 +114,7 @@ services:
     image: bramjanssens/umpire-quiz-user-service:${USER_SERVICE_VERSION}
     pull_policy: always
     ports:
-      - "${USER_SERVICE_PORT}:9080"
+      - "${USER_SERVICE_EXPOSED_PORT}:9080"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:9080/health/ready" ]
       interval: 2s
@@ -123,6 +122,8 @@ services:
       retries: 24
       start_period: 10s
     environment:
+      HTTP_PORT: "${HTTP_PORT}"
+      HTTPS_PORT: "${HTTPS_PORT}"
       MYSQL_HOSTNAME: "${USER_SERVICE_DB_HOST_NAME}"
       MYSQL_PORT: "${DB_PORT}"
       MYSQL_DATABASE: "${USERS_DB}"
