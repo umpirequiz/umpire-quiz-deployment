@@ -1,2 +1,0 @@
-[09/Feb/2026:16:01:09 +0000] 405 - OPTIONS http umpire.quiz "/question-service/questions/count" [Client 192.168.127.1] [Length 556] [Gzip -] "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" "http://umpire.quiz:8080/"
-[09/Feb/2026:16:01:11 +0000] 405 - OPTIONS http umpire.quiz "/question-service/questions/count" [Client 192.168.127.1] [Length 556] [Gzip -] "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" "http://umpire.quiz:8080/"
